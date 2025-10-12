@@ -1,9 +1,11 @@
 GSC Sitemap Submitter — Metro UI
 =================================
 
-Google Search Console'a (GSC) toplu sitemap bildirme işlemini tek tıkla yapan, modern Metro temalı bir masaüstü uygulaması.
-Python + Tkinter ile geliştirilmiştir. OAuth ile güvenli giriş yapar, .txt içindeki tüm sitemap URL’lerini otomatik olarak GSC’ye gönderir.
-
+Google Search Console'a (GSC) toplu sitemap bildirme işlemini tek tıkla yapan, modern Metro temalı bir masaüstü uygulaması.<br>
+Python + Tkinter ile geliştirilmiştir. OAuth ile güvenli giriş yapar, .txt içindeki tüm sitemap URL’lerini otomatik olarak GSC’ye gönderir.<br>
+---
+Program Ekran Görüntüsü
+![Uygulama Ekran Görüntüsü](s1.png)
 ------------------------------------------------------------
 ✨ ÖZELLİKLER
 ------------------------------------------------------------
