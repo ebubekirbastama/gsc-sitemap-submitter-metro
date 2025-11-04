@@ -126,6 +126,8 @@ class App(tk.Tk):
         # NEW buttons
         ttk.Button(controls, text="📜 Mevcut Sitemap’leri Listele", style="Ghost.TButton", command=self.on_list_existing).pack(side="left", padx=(0,6))
         ttk.Button(controls, text="🔍 Durum Kontrolü", style="Ghost.TButton", command=self.on_check_status).pack(side="left", padx=(0,6))
+        ttk.Button(controls, text="📊 Performans Verilerini Getir", style="Ghost.TButton", command=self.on_fetch_performance).pack(side="left", padx=(0,6))
+        ttk.Button(controls, text="📤 Listelenenleri Submit Et", style="Ghost.TButton", command=self.on_resubmit_listed).pack(side="left", padx=(0,6))
 
         # Right: log
         right = ttk.Frame(shell, style="Card.TFrame", padding=8)
@@ -136,6 +138,14 @@ class App(tk.Tk):
         log_scroll = ttk.Scrollbar(right, orient="vertical", command=self.txt_log.yview)
         self.txt_log.configure(yscrollcommand=log_scroll.set)
         log_scroll.grid(row=1, column=1, sticky="ns")
+        
+        ttk.Label(right, text="📊 Performans Özeti:", style="Card.TLabel").grid(row=2, column=0, sticky="w", pady=(10,2))
+        self.txt_perf = tk.Text(right, height=8, wrap="word", bg="#0b1220", fg=self.P_INFO, relief="flat", padx=10, pady=10)
+        self.txt_perf.grid(row=3, column=0, sticky="nsew", pady=(4,4))
+        perf_scroll = ttk.Scrollbar(right, orient="vertical", command=self.txt_perf.yview)
+        self.txt_perf.configure(yscrollcommand=perf_scroll.set)
+        perf_scroll.grid(row=3, column=1, sticky="ns")
+
 
         # Footer
         footer = ttk.Frame(self, style="Subtle.TFrame", padding=(10, 8))
@@ -152,9 +162,162 @@ class App(tk.Tk):
         shell.grid_columnconfigure(1, weight=1)
         left.grid_rowconfigure(1, weight=1)
         left.grid_columnconfigure(0, weight=1)
-        right.grid_rowconfigure(1, weight=1)
+        right.grid_rowconfigure(3, weight=1)
         right.grid_columnconfigure(0, weight=1)
-
+        
+      
+    def on_list_existing(self):
+        if self.service is None:
+            return messagebox.showwarning("Uyarı", "Önce OAuth yapın.")
+        self.listbox.delete(0, tk.END)
+        self._log("Sitemap listesi alınıyor, lütfen bekleyin...")
+    
+        def run():
+            try:
+                total_sitemaps = 0
+                site_urls = self.service.sites().list().execute().get("siteEntry", [])
+                for site in site_urls:
+                    site_url = site.get("siteUrl")
+                    self._log(f"🌐 Site: {site_url}")
+                    try:
+                        sitemaps = self.service.sitemaps().list(siteUrl=site_url).execute().get("sitemap", [])
+                        for sm in sitemaps:
+                            sm_path = sm.get("path")
+                            # 🧩 path göreliyse site_url ile birleştir
+                            if sm_path.startswith("/"):
+                                sm_url = site_url.rstrip("/") + sm_path
+                            else:
+                                sm_url = sm_path
+                            # Listeye ve log’a ekle
+                            self.listbox.insert(tk.END, sm_url)
+                            self._log(f"   • {sm_url} (Last submitted: {sm.get('lastSubmitted')})")
+                            total_sitemaps += 1
+                    except HttpError as e:
+                        self._log(f"   ⚠️ Sitemap bilgisi alınamadı: {e}")
+    
+                # 🧾 Özet log ve kullanıcıya bilgi kutusu
+                self._log(f"Toplam {total_sitemaps} sitemap bulundu ve listeye eklendi.")
+                messagebox.showinfo("Listeleme Tamamlandı", f"Toplam {total_sitemaps} sitemap bulundu ve listeye eklendi.")
+                
+            except Exception as e:
+                self._log(f"HATA (listeleme): {e}")
+    
+        threading.Thread(target=run, daemon=True).start()
+    
+    
+    def on_resubmit_listed(self):
+        if self.service is None:
+            return messagebox.showwarning("Uyarı", "Önce OAuth yapın.")
+    
+        # Liste içeriğinde sitemap URL'leri var mı kontrol et
+        all_items = [self.listbox.get(i) for i in range(self.listbox.size())]
+        sitemaps = [u.strip() for u in all_items if u.strip().endswith(".xml")]
+    
+        if not sitemaps:
+            return messagebox.showinfo("Bilgi", "Listede gönderilecek sitemap bulunamadı.")
+    
+        if not messagebox.askyesno("Onay", f"{len(sitemaps)} sitemap yeniden submit edilecek. Devam edilsin mi?"):
+            return
+    
+        def run():
+            ok = 0
+            for i, sm_url in enumerate(sitemaps, 1):
+                try:
+                    prefix = base_prefix_from_sitemap(sm_url)
+                    self._log(f"[{i}/{len(sitemaps)}] Yeniden Submit → {sm_url}")
+                    self.service.sitemaps().submit(siteUrl=prefix, feedpath=sm_url).execute()
+                    self._log(f"✅ Gönderildi: {sm_url}")
+                    ok += 1
+                except Exception as e:
+                    self._log(f"❌ Hata: {sm_url} — {e}")
+            self._log(f"Tamamlandı. Başarılı: {ok}/{len(sitemaps)}")
+            messagebox.showinfo("Tamamlandı", f"Başarılı: {ok}/{len(sitemaps)}")
+        threading.Thread(target=run, daemon=True).start()
+          
+    def on_fetch_performance(self):
+        if self.service is None:
+            return messagebox.showwarning("Uyarı", "Önce OAuth yapın.")
+    
+        self.listbox.delete(0, tk.END)
+        self.txt_perf.delete("1.0", tk.END)
+    
+        def run():
+            try:
+                sites = self.service.sites().list().execute().get("siteEntry", [])
+                if not sites:
+                    return self._log("Hiç doğrulanmış site bulunamadı.")
+                self._log(f"{len(sites)} site bulundu. Performans verileri alınıyor…")
+    
+                import datetime
+                end_date = datetime.date.today()
+                start_date = end_date - datetime.timedelta(days=7)
+    
+                self.site_performance = {}
+    
+                for site in sites:
+                    site_url = site.get("siteUrl")
+                    try:
+                        result = self.service.searchanalytics().query(
+                            siteUrl=site_url,
+                            body={
+                                "startDate": start_date.isoformat(),
+                                "endDate": end_date.isoformat(),
+                                "dimensions": []
+                            }
+                        ).execute()
+    
+                        rows = result.get("rows", [])
+                        clicks = impressions = ctr = position = 0.0
+                        if rows:
+                            for row in rows:
+                                clicks += row.get("clicks", 0)
+                                impressions += row.get("impressions", 0)
+                                ctr += row.get("ctr", 0)
+                                position += row.get("position", 0)
+                            ctr = (ctr / len(rows)) * 100
+                            position = position / len(rows)
+    
+                        info = {
+                            "clicks": clicks,
+                            "impressions": impressions,
+                            "ctr": round(ctr, 2),
+                            "position": round(position, 2)
+                        }
+                        self.site_performance[site_url] = info
+                        self.listbox.insert(tk.END, site_url)
+                        self._log(f"📊 {site_url} — {clicks:.0f} tıklama, {impressions:.0f} gösterim")
+                    except Exception as e:
+                        self._log(f"⚠️ {site_url} performans alınamadı: {e}")
+    
+                self._log("Performans verileri alındı. Sol listeden bir site seçin.")
+                self.listbox.bind("<<ListboxSelect>>", self._show_site_performance)
+    
+            except Exception as e:
+                self._log(f"HATA (performans): {e}")
+    
+        threading.Thread(target=run, daemon=True).start()
+    
+    
+    def _show_site_performance(self, event=None):
+        if not hasattr(self, "site_performance"):
+            return
+        sel = self.listbox.curselection()
+        if not sel:
+            return
+        site_url = self.listbox.get(sel[0])
+        perf = self.site_performance.get(site_url)
+        if not perf:
+            return
+        self.txt_perf.delete("1.0", tk.END)
+        self.txt_perf.insert(tk.END,
+            f"📍 Site: {site_url}\n\n"
+            f"Son 7 Gün:\n"
+            f"• Tıklama: {perf['clicks']:.0f}\n"
+            f"• Gösterim: {perf['impressions']:.0f}\n"
+            f"• CTR: {perf['ctr']}%\n"
+            f"• Ortalama Pozisyon: {perf['position']}\n"
+        )
+    
     def _make_responsive(self):
         self.grid_rowconfigure(1, weight=1)
         self.grid_columnconfigure(0, weight=1)
@@ -246,25 +409,6 @@ class App(tk.Tk):
             self._log(f"Tamamlandı. Başarılı: {ok}/{len(urls)}")
         threading.Thread(target=run, daemon=True).start()
 
-    # ---------- NEW FEATURES ----------
-    def on_list_existing(self):
-        if self.service is None:
-            return messagebox.showwarning("Uyarı", "Önce OAuth yapın.")
-        def run():
-            try:
-                site_urls = self.service.sites().list().execute().get("siteEntry", [])
-                for site in site_urls:
-                    url = site.get("siteUrl")
-                    self._log(f"🌐 Site: {url}")
-                    try:
-                        sitemaps = self.service.sitemaps().list(siteUrl=url).execute().get("sitemap", [])
-                        for sm in sitemaps:
-                            self._log(f"   • {sm['path']} (Last submitted: {sm.get('lastSubmitted')})")
-                    except HttpError:
-                        self._log(f"   ⚠️ Sitemap bilgisi alınamadı.")
-            except Exception as e:
-                self._log(f"HATA (listeleme): {e}")
-        threading.Thread(target=run, daemon=True).start()
 
     def on_check_status(self):
         if self.service is None:
