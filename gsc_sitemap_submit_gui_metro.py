@@ -11,7 +11,7 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 
-APP_TITLE = "EBS GSC Sitemap Submitter — Metro UI"
+APP_TITLE = "GSC Sitemap Submitter — Metro UI"
 SCOPES = ["https://www.googleapis.com/auth/webmasters"]
 
 # -------------------- OAuth --------------------
@@ -209,9 +209,17 @@ class App(tk.Tk):
         threading.Thread(target=run, daemon=True).start()
 
     def on_load_txt(self):
+        # Çapraz platform başlangıç dizini (script’in bulunduğu klasör)
+        try:
+            base_dir = os.path.dirname(os.path.abspath(__file__))
+        except NameError:
+            # Bazı ortamlarda (__file__) tanımsız olabilir
+            base_dir = os.getcwd()
+    
         path = filedialog.askopenfilename(
             title="Sitemap URL listesi (.txt)",
-            filetypes=[("Text", "*.txt"), ("All files", "*.*")]
+            filetypes=[("Text", "*.txt"), ("All files", "*.*")],
+            initialdir=base_dir  # Çapraz platform dizin
         )
         if not path:
             return
@@ -229,6 +237,7 @@ class App(tk.Tk):
         except Exception as e:
             self._log(f"HATA (.txt okuma): {e}")
             messagebox.showerror("Hata", str(e))
+    
 
     def on_add_manual(self):
         def add():
