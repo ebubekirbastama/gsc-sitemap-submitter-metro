@@ -108,3 +108,92 @@ python -m venv .venv
 source .venv/bin/activate
 
 pip install -r requirements.txt
+```
+
+---
+
+### 3️⃣ Google OAuth Hazırlığı
+1. Google Cloud Console → APIs & Services → Credentials  
+2. **Create Credentials → OAuth client ID**  
+3. Application type: **Desktop app**  
+4. İndirilen dosyayı proje köküne `credentials.json` adıyla koyun  
+5. **Search Console API**’yi etkinleştirin  
+6. İlk çalıştırmada tarayıcıdan izin verilir ve `token.json` kaydedilir  
+
+---
+
+### 4️⃣ Çalıştırma
+```bash
+python gsc_sitemap_submit_gui_metro.py
+```
+
+---
+
+### 5️⃣ Kullanım Akışı
+1. **🔐 Google ile Yetkilendir**  
+2. **📂 .txt Yükle** veya **📜 Mevcut Sitemap’leri Listele**  
+3. **🚀 Seçilenleri Submit Et** veya **📤 Listelenenleri Submit Et**  
+4. **🔍 Durum Kontrolü** → sitemap durumlarını görüntüle  
+5. **📊 Performans Verilerini Getir** → son 7 günün özetini al  
+6. **💾 Log Kaydet (.txt)** → tüm işlemleri dışa aktar  
+
+---
+
+#### 📄 .txt Örnek:
+```text
+https://alanadiniz.com/sitemap.xml
+https://site2.com/sitemap_index.xml
+https://site3.com/sitemaps/news.xml
+```
+
+---
+
+## 🧩 PROJE YAPISI
+```text
+gsc-sitemap-submitter-metro/
+├─ gsc_sitemap_submit_gui_metro.py
+├─ requirements.txt
+├─ .gitignore
+└─ README.md
+```
+
+---
+
+## ⚠️ SIK KARŞILAŞILAN HATALAR
+
+- **HttpError 403** → site doğrulanmamış veya yanlış hesap  
+- **credentials.json yok** → Cloud Console’dan oluşturun  
+- **invalid_grant** → `token.json` silip yeniden yetkilendirin  
+- **“Listede gönderilecek sitemap bulunamadı.”** → GSC’den listeleme yapmadıysanız bu normaldir  
+- **.txt hatası** → her satır tam URL olmalı (`.xml` ile bitmeli)  
+
+---
+
+## 🔐 GÜVENLİK NOTLARI
+- `credentials.json` ve `token.json` gizli dosyalardır  
+- Versiyon kontrolüne dahil edilmemelidir  
+- `.gitignore` bu dosyaları kapsar  
+
+---
+
+## 🧭 YOL HARİTASI
+- [x] GSC’den mevcut sitemap’leri listeleme  
+- [x] Listelenen sitemap’leri tekrar submit etme  
+- [x] Durum kontrolü (sitemaps.get)  
+- [x] Performans (Search Analytics) özet paneli  
+- [x] Log dışa aktarma  
+- [ ] Tema seçenekleri (açık / koyu)  
+- [ ] Çoklu kullanıcı profili  
+- [ ] CLI modu  
+
+---
+
+## 🤝 KATKIDA BULUNMA
+Pull request’ler ve issue’lar memnuniyetle kabul edilir!
+
+---
+
+## 📄 LİSANS
+MIT Lisansı – Dilediğiniz gibi kullanın, geliştirin, özelleştirin.
+
+---
