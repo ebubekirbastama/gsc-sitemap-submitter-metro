@@ -1,4 +1,3 @@
-# gsc_sitemap_submit_gui_metro.py
 import os
 import platform
 import threading
@@ -45,86 +44,63 @@ class App(tk.Tk):
     def __init__(self):
         super().__init__()
         self.title(APP_TITLE)
-        self.geometry("980x640")
+        self.geometry("980x680")
         self.minsize(900, 560)
 
         self.service = None
-
         self._apply_metro_style()
         self._build_ui()
         self._make_responsive()
 
     # ---------- Metro Style ----------
     def _apply_metro_style(self):
-        # Palette
-        self.P_BG      = "#0f172a"  # slate-900
-        self.P_CARD    = "#111827"  # gray-900
-        self.P_SURFACE = "#1f2937"  # gray-800
-        self.P_ACCENT  = "#22c55e"  # emerald-500
-        self.P_ACCENT_D= "#16a34a"  # emerald-600
-        self.P_TEXT    = "#e5e7eb"  # gray-200
-        self.P_MUTED   = "#9ca3af"  # gray-400
-        self.P_ERR     = "#ef4444"  # red-500
-        self.P_INFO    = "#38bdf8"  # sky-400
+        self.P_BG      = "#0f172a"
+        self.P_CARD    = "#111827"
+        self.P_SURFACE = "#1f2937"
+        self.P_ACCENT  = "#22c55e"
+        self.P_ACCENT_D= "#16a34a"
+        self.P_TEXT    = "#e5e7eb"
+        self.P_MUTED   = "#9ca3af"
+        self.P_ERR     = "#ef4444"
+        self.P_INFO    = "#38bdf8"
 
         self.configure(bg=self.P_BG)
         base_font = "Segoe UI" if platform.system() == "Windows" else "Helvetica"
         self.option_add("*Font", (base_font, 10))
-        self.option_add("*TNotebook.TabPadding", [16, 8])
-        self.option_add("*TButton.Padding", 8)
 
         style = ttk.Style(self)
-        try:
-            style.theme_use("clam")
-        except Exception:
-            pass
+        try: style.theme_use("clam")
+        except Exception: pass
 
-        # Containers
         style.configure("Card.TFrame", background=self.P_SURFACE)
         style.configure("Subtle.TFrame", background=self.P_CARD)
         style.configure("TLabel", background=self.P_BG, foreground=self.P_TEXT)
         style.configure("Card.TLabel", background=self.P_SURFACE, foreground=self.P_TEXT)
         style.configure("Muted.TLabel", background=self.P_BG, foreground=self.P_MUTED)
-
-        # Inputs
         style.configure("TEntry", fieldbackground="#0b1220", foreground=self.P_TEXT, insertcolor=self.P_TEXT)
-        style.configure("TCombobox", fieldbackground="#0b1220", foreground=self.P_TEXT)
-        style.map("TEntry", fieldbackground=[("focus", "#0d1526")])
-
-        # Buttons
         style.configure("Accent.TButton", background=self.P_ACCENT, foreground="#0b0f1a", borderwidth=0)
-        style.map("Accent.TButton",
-                  background=[("active", self.P_ACCENT_D)],
-                  foreground=[("active", "#ffffff")])
+        style.map("Accent.TButton", background=[("active", self.P_ACCENT_D)])
         style.configure("Ghost.TButton", background=self.P_SURFACE, foreground=self.P_TEXT, borderwidth=0)
         style.map("Ghost.TButton", background=[("active", "#2a3648")])
-
-        # LabelFrame
-        style.configure("TLabelframe", background=self.P_CARD, foreground=self.P_TEXT, borderwidth=0)
-        style.configure("TLabelframe.Label", background=self.P_CARD, foreground=self.P_MUTED)
 
     # ---------- UI ----------
     def _build_ui(self):
         # Header
         header = ttk.Frame(self, style="Subtle.TFrame", padding=(18, 16))
         header.grid(row=0, column=0, sticky="nsew", padx=12, pady=(12, 8))
-
         title = ttk.Label(header, text="🗺️ GSC Sitemap Submitter", style="Card.TLabel")
-        title.configure(font=(self.option_get("Font","") or "Segoe UI", 16, "bold"))
-        subtitle = ttk.Label(header, text="Sitemap URL’lerini .txt’den yükle • Google Search Console’a toplu submit",
+        title.configure(font=("Segoe UI", 16, "bold"))
+        subtitle = ttk.Label(header, text="Sitemap URL’lerini yükle, GSC’ye gönder, listele, durum kontrolü yap.",
                              style="Card.TLabel")
         subtitle.configure(foreground=self.P_MUTED)
-
         actbar = ttk.Frame(header, style="Subtle.TFrame")
-        self.btn_auth = ttk.Button(actbar, text="🔐 Google ile Yetkilendir (OAuth)",
-                                   style="Accent.TButton", command=self.on_auth)
+        self.btn_auth = ttk.Button(actbar, text="🔐 Google ile Yetkilendir", style="Accent.TButton", command=self.on_auth)
         self.lbl_status = ttk.Label(actbar, text="Durum: Bağlı değil", style="Card.TLabel")
-
-        title.grid(row=0, column=0, sticky="w", padx=(2, 12))
+        title.grid(row=0, column=0, sticky="w")
         actbar.grid(row=0, column=1, sticky="e")
-        subtitle.grid(row=1, column=0, columnspan=2, sticky="w", padx=(2, 12), pady=(6,0))
-        self.btn_auth.grid(row=0, column=0, sticky="e", padx=(0, 10))
-        self.lbl_status.grid(row=0, column=1, sticky="e")
+        subtitle.grid(row=1, column=0, columnspan=2, sticky="w", pady=(6,0))
+        self.btn_auth.grid(row=0, column=0, padx=(0,10))
+        self.lbl_status.grid(row=0, column=1)
 
         # Body shell
         shell = ttk.Frame(self, style="Card.TFrame", padding=10)
@@ -133,14 +109,9 @@ class App(tk.Tk):
         # Left: list
         left = ttk.Frame(shell, style="Card.TFrame", padding=8)
         left.grid(row=0, column=0, sticky="nsew")
-
-        ttk.Label(left, text="📄 Sitemap URL listesi (.txt):", style="Card.TLabel").grid(row=0, column=0, sticky="w")
-        self.listbox = tk.Listbox(left, selectmode="extended",
-                                  bg="#0b1220", fg=self.P_TEXT, relief="flat",
-                                  highlightthickness=0)
-        self.listbox.grid(row=1, column=0, sticky="nsew", pady=(6, 4))
-
-        # Scrollbar for listbox
+        ttk.Label(left, text="📄 Sitemap URL listesi:", style="Card.TLabel").grid(row=0, column=0, sticky="w")
+        self.listbox = tk.Listbox(left, selectmode="extended", bg="#0b1220", fg=self.P_TEXT, relief="flat")
+        self.listbox.grid(row=1, column=0, sticky="nsew", pady=(6,4))
         lb_scroll = ttk.Scrollbar(left, orient="vertical", command=self.listbox.yview)
         self.listbox.configure(yscrollcommand=lb_scroll.set)
         lb_scroll.grid(row=1, column=1, sticky="ns")
@@ -150,18 +121,18 @@ class App(tk.Tk):
         ttk.Button(controls, text="📂 .txt Yükle", style="Ghost.TButton", command=self.on_load_txt).pack(side="left", padx=(0,6))
         ttk.Button(controls, text="➕ Elle Ekle", style="Ghost.TButton", command=self.on_add_manual).pack(side="left", padx=(0,6))
         ttk.Button(controls, text="🗑️ Seçileni Sil", style="Ghost.TButton", command=self.on_delete_selected).pack(side="left", padx=(0,6))
-        ttk.Button(controls, text="🧹 Temizle", style="Ghost.TButton", command=self.on_clear_all).pack(side="left")
+        ttk.Button(controls, text="🧹 Temizle", style="Ghost.TButton", command=self.on_clear_all).pack(side="left", padx=(0,6))
+
+        # NEW buttons
+        ttk.Button(controls, text="📜 Mevcut Sitemap’leri Listele", style="Ghost.TButton", command=self.on_list_existing).pack(side="left", padx=(0,6))
+        ttk.Button(controls, text="🔍 Durum Kontrolü", style="Ghost.TButton", command=self.on_check_status).pack(side="left", padx=(0,6))
 
         # Right: log
         right = ttk.Frame(shell, style="Card.TFrame", padding=8)
         right.grid(row=0, column=1, sticky="nsew", padx=(10,0))
-
         ttk.Label(right, text="📜 Log:", style="Card.TLabel").grid(row=0, column=0, sticky="w")
-        self.txt_log = tk.Text(right, height=10, wrap="word",
-                               bg="#0b1220", fg=self.P_TEXT, insertbackground=self.P_TEXT,
-                               relief="flat", padx=10, pady=10)
+        self.txt_log = tk.Text(right, height=10, wrap="word", bg="#0b1220", fg=self.P_TEXT, relief="flat", padx=10, pady=10)
         self.txt_log.grid(row=1, column=0, sticky="nsew", pady=(6,4))
-
         log_scroll = ttk.Scrollbar(right, orient="vertical", command=self.txt_log.yview)
         self.txt_log.configure(yscrollcommand=log_scroll.set)
         log_scroll.grid(row=1, column=1, sticky="ns")
@@ -169,28 +140,22 @@ class App(tk.Tk):
         # Footer
         footer = ttk.Frame(self, style="Subtle.TFrame", padding=(10, 8))
         footer.grid(row=2, column=0, sticky="nsew", padx=12, pady=(0,12))
-        self.btn_submit = ttk.Button(footer, text="🚀 Seçilenleri Submit Et", style="Accent.TButton",
-                                     command=self.on_submit_selected)
+        ttk.Button(footer, text="💾 Log Kaydet (.txt)", style="Ghost.TButton", command=self.on_save_log).pack(side="left")
+        self.btn_submit = ttk.Button(footer, text="🚀 Seçilenleri Submit Et", style="Accent.TButton", command=self.on_submit_selected)
         self.btn_submit.pack(side="right")
 
-        # Intro log
-        self._log("Uygulama hazır. Önce OAuth ile yetkilendirin, ardından .txt dosyasını yükleyin.")
+        self._log("Uygulama hazır. OAuth yap, sitemap’leri yükle veya listele.")
 
-        # Grid weights inside shell
+        # Grid configs
         shell.grid_rowconfigure(0, weight=1)
         shell.grid_columnconfigure(0, weight=1)
         shell.grid_columnconfigure(1, weight=1)
-
-        # Left panel weights
         left.grid_rowconfigure(1, weight=1)
         left.grid_columnconfigure(0, weight=1)
-
-        # Right panel weights
         right.grid_rowconfigure(1, weight=1)
         right.grid_columnconfigure(0, weight=1)
 
     def _make_responsive(self):
-        # Root grid weights (header, body, footer)
         self.grid_rowconfigure(1, weight=1)
         self.grid_columnconfigure(0, weight=1)
 
@@ -204,51 +169,40 @@ class App(tk.Tk):
                 self.lbl_status.config(text="Durum: Bağlı")
                 self._log("Google Search Console servisi hazır.")
             except Exception as e:
-                self._log(f"HATA (OAuth/Service): {e}")
+                self._log(f"HATA (OAuth): {e}")
                 messagebox.showerror("Hata", str(e))
         threading.Thread(target=run, daemon=True).start()
 
     def on_load_txt(self):
-        # Çapraz platform başlangıç dizini (script’in bulunduğu klasör)
         try:
             base_dir = os.path.dirname(os.path.abspath(__file__))
         except NameError:
-            # Bazı ortamlarda (__file__) tanımsız olabilir
             base_dir = os.getcwd()
-    
         path = filedialog.askopenfilename(
             title="Sitemap URL listesi (.txt)",
             filetypes=[("Text", "*.txt"), ("All files", "*.*")],
-            initialdir=base_dir  # Çapraz platform dizin
+            initialdir=base_dir
         )
         if not path:
             return
         try:
             with open(path, "r", encoding="utf-8") as f:
                 lines = [ln.strip() for ln in f if ln.strip()]
-            added = 0
             for ln in lines:
                 if is_probably_sitemap(ln):
                     self.listbox.insert(tk.END, ln)
-                    added += 1
-            self._log(f"Yüklendi: {path} — {added} satır eklendi.")
-            if added == 0:
-                messagebox.showwarning("Uyarı", ".txt içinde geçerli sitemap URL bulunamadı ('.xml' beklenir).")
+            self._log(f"{len(lines)} satır yüklendi: {os.path.basename(path)}")
         except Exception as e:
-            self._log(f"HATA (.txt okuma): {e}")
+            self._log(f"HATA (.txt): {e}")
             messagebox.showerror("Hata", str(e))
-    
 
     def on_add_manual(self):
         def add():
             url = ent.get().strip()
             if not url:
                 return
-            if not is_probably_sitemap(url):
-                messagebox.showwarning("Uyarı", "Bu URL bir sitemap gibi görünmüyor (.xml). Yine de eklendi.")
             self.listbox.insert(tk.END, url)
             win.destroy()
-
         win = tk.Toplevel(self)
         win.title("Sitemap URL ekle")
         win.configure(bg=self.P_BG)
@@ -269,38 +223,82 @@ class App(tk.Tk):
 
     def on_submit_selected(self):
         if self.service is None:
-            messagebox.showwarning("Uyarı", "Önce OAuth ile yetkilendirin.")
-            return
-
+            return messagebox.showwarning("Uyarı", "Önce OAuth ile yetkilendirin.")
         sel = self.listbox.curselection()
         indices = sel if sel else range(self.listbox.size())
         urls = [self.listbox.get(i) for i in indices]
-
         if not urls:
-            messagebox.showinfo("Bilgi", "Gönderilecek URL yok.")
-            return
-
-        if not messagebox.askyesno("Onay", f"{len(urls)} sitemap URL submit edilecek. Devam?"):
+            return messagebox.showinfo("Bilgi", "Gönderilecek URL yok.")
+        if not messagebox.askyesno("Onay", f"{len(urls)} sitemap gönderilecek, devam edilsin mi?"):
             return
 
         def run():
-            ok_count = 0
+            ok = 0
             for i, u in enumerate(urls, 1):
-                u = u.strip()
                 try:
                     prefix = base_prefix_from_sitemap(u)
-                    self._log(f"[{i}/{len(urls)}] Submit → site: {prefix} | feed: {u}")
+                    self._log(f"[{i}/{len(urls)}] Submit → {u}")
                     self.service.sitemaps().submit(siteUrl=prefix, feedpath=u).execute()
-                    self._log(f" ✅ OK: {u}")
-                    ok_count += 1
-                except HttpError as e:
-                    self._log(f" ❌ HttpError: {u} — {e}")
+                    self._log(f"✅ OK: {u}")
+                    ok += 1
                 except Exception as e:
-                    self._log(f" ❌ Hata: {u} — {e}")
-            self._log(f"Tamamlandı. Başarılı: {ok_count}/{len(urls)}")
-            messagebox.showinfo("Bitti", f"Başarılı: {ok_count}/{len(urls)}")
-
+                    self._log(f"❌ Hata: {u} — {e}")
+            self._log(f"Tamamlandı. Başarılı: {ok}/{len(urls)}")
         threading.Thread(target=run, daemon=True).start()
+
+    # ---------- NEW FEATURES ----------
+    def on_list_existing(self):
+        if self.service is None:
+            return messagebox.showwarning("Uyarı", "Önce OAuth yapın.")
+        def run():
+            try:
+                site_urls = self.service.sites().list().execute().get("siteEntry", [])
+                for site in site_urls:
+                    url = site.get("siteUrl")
+                    self._log(f"🌐 Site: {url}")
+                    try:
+                        sitemaps = self.service.sitemaps().list(siteUrl=url).execute().get("sitemap", [])
+                        for sm in sitemaps:
+                            self._log(f"   • {sm['path']} (Last submitted: {sm.get('lastSubmitted')})")
+                    except HttpError:
+                        self._log(f"   ⚠️ Sitemap bilgisi alınamadı.")
+            except Exception as e:
+                self._log(f"HATA (listeleme): {e}")
+        threading.Thread(target=run, daemon=True).start()
+
+    def on_check_status(self):
+        if self.service is None:
+            return messagebox.showwarning("Uyarı", "Önce OAuth yapın.")
+        sel = self.listbox.curselection()
+        urls = [self.listbox.get(i) for i in sel] if sel else [self.listbox.get(i) for i in range(self.listbox.size())]
+        if not urls:
+            return messagebox.showinfo("Bilgi", "Kontrol edilecek sitemap yok.")
+        def run():
+            for u in urls:
+                try:
+                    prefix = base_prefix_from_sitemap(u)
+                    resp = self.service.sitemaps().get(siteUrl=prefix, feedpath=u).execute()
+                    self._log(f"🔍 {u} → Status: {resp.get('isPending', False)}, LastDownload: {resp.get('lastDownloaded')}")
+                except Exception as e:
+                    self._log(f"❌ {u} — {e}")
+        threading.Thread(target=run, daemon=True).start()
+
+    def on_save_log(self):
+        path = filedialog.asksaveasfilename(
+            title="Log dosyasını kaydet",
+            defaultextension=".txt",
+            filetypes=[("Text files", "*.txt")],
+            initialdir=os.getcwd()
+        )
+        if not path:
+            return
+        try:
+            with open(path, "w", encoding="utf-8") as f:
+                f.write(self.txt_log.get("1.0", tk.END))
+            self._log(f"💾 Log kaydedildi: {path}")
+            messagebox.showinfo("Bilgi", f"Log kaydedildi:\n{path}")
+        except Exception as e:
+            self._log(f"HATA (log kaydetme): {e}")
 
     # ---------- Utils ----------
     def _log(self, msg: str):
