@@ -1,139 +1,110 @@
-GSC Sitemap Submitter — Metro UI
-=================================
+# GSC Sitemap Submitter — Metro UI
 
-Google Search Console'a (GSC) toplu sitemap bildirme işlemini tek tıkla yapan, modern Metro temalı bir masaüstü uygulaması.<br>
-Python + Tkinter ile geliştirilmiştir. OAuth ile güvenli giriş yapar, .txt içindeki tüm sitemap URL’lerini otomatik olarak GSC’ye gönderir.<br>
+Google Search Console'a (GSC) **toplu sitemap bildirme** işlemini tek tıkla yapan, modern Metro temalı bir masaüstü uygulaması.  
+Python + Tkinter ile geliştirilmiştir. OAuth ile güvenli giriş yapar, `.txt` içindeki tüm sitemap URL’lerini otomatik olarak GSC’ye gönderir.
+
 ---
-Program Ekran Görüntüsü
+
+## 🖼️ Program Ekran Görüntüsü
 ![Uygulama Ekran Görüntüsü](s1.png)
-------------------------------------------------------------
-✨ ÖZELLİKLER
-------------------------------------------------------------
-🗂️ Toplu yükleme: .txt dosyasından sınırsız sitemap URL’i alır <br>
-🧠 Akıllı site tespiti: https://ebubekirbastama.com/ kök URL’sini otomatik çıkartır<br>
-🔐 Güvenli OAuth: credentials.json ile Google hesabınızda yetkilendirme<br>
-🪟 Modern Metro UI: Koyu tema, kart yapısı, responsive düzen<br>
-🧾 Anlık log: Her adımı canlı olarak görürsünüz (başarılı / hata)<br>
-✅ GSC API v3: Resmî webmasters API ile uyumlu<br>
 
-------------------------------------------------------------
-🧭 KİMLER KULLANMALI?
-------------------------------------------------------------
-📰 Haber siteleri ve çoklu domain yöneten yayıncılar  
-🛍️ E-ticaret ve pazaryeri işletmeleri  
-🧰 SEO ajansları / uzmanları (müşterilerin GSC gönderimlerini hızlandırmak için)  
-🧑‍💻 Web geliştiricileri (deployment sonrası sitemap süreçlerini otomatikleştirmek için)
+---
 
-------------------------------------------------------------
-🤔 NEDEN BU ARAÇ?
-------------------------------------------------------------
-⏱️ Aynı işlemi GSC arayüzünde tek tek yapmak zaman alır  
-🧩 Tüm sitelerinizi tek pencereden yönetirsiniz  
-🛡️ OAuth sayesinde hesap güvenliği korunur  
-✔️ Hata durumlarını ve başarıları net log ile görürsünüz
+## ✨ ÖZELLİKLER
 
-------------------------------------------------------------
-🚀 HIZLI BAŞLANGIÇ
-------------------------------------------------------------
+- 🗂️ **Toplu yükleme:** `.txt` dosyasından sınırsız sitemap URL’i alır  
+- 🧠 **Akıllı site tespiti:** `https://alanadiniz.com/sitemap.xml` içinden otomatik olarak `https://alanadiniz.com/` kök URL’sini çıkarır  
+- 🔐 **Güvenli OAuth:** `credentials.json` ile Google hesabınızda yetkilendirme  
+- 🪟 **Modern Metro UI:** Koyu tema, kart yapısı, responsive düzen  
+- 🧾 **Anlık log:** Her adımı canlı olarak görürsünüz (başarılı / hata)  
+- ✅ **GSC API v3:** Resmî webmasters API ile uyumlu  
+- 💾 **Log kaydet:** Uygulama içindeki log’u tek tuşla `.txt` olarak dışa aktarabilirsiniz  
+- 🧰 **Çapraz platform:** Windows ve Linux ile uyumlu  
 
-1) GEREKSİNİMLER
-- Python 3.9+
-- Google Cloud Console erişimi (OAuth oluşturmak için)
-- İlgili sitelerin GSC’de doğrulanmış olması
+---
 
-2) KURULUM
---------------------------------
-git clone https://github.com/ebubekirbastama/gsc-sitemap-submitter-metro.git<br>
-cd gsc-sitemap-submitter-metro<br>
+## 🆕 Yeni Eklenen Araç (Tools) Özellikleri
+
+### 📜 Mevcut Sitemap’leri Listele
+- GSC’de doğrulanmış tüm siteleri çeker  
+- Her site için GSC’de kayıtlı sitemap’leri listeler  
+- Bulunan tüm sitemap URL’lerini **listeye otomatik ekler**  
+- İşlem sonunda şu uyarı çıkar:  
+  > “Toplam X sitemap bulundu ve listeye eklendi.”  
+- Eğer path yalnızca `/sitemap.xml` şeklindeyse otomatik olarak tam URL’ye dönüştürür (`https://site.com/sitemap.xml`)
+
+---
+
+### 📤 Listelenenleri Submit Et
+- GSC’den çekilen tüm sitemap’leri yeniden GSC’ye gönderir  
+- Kaç sitemap gönderileceğini kullanıcıdan onay alır  
+- Log’da her adımı gösterir (`✅ Gönderildi` / `❌ Hata`)  
+- Tüm sitemap’lerin hızlı şekilde “refresh” edilmesini sağlar  
+
+---
+
+### 🔍 Durum Kontrolü
+- Listedeki sitemap’lerin GSC üzerindeki durumunu kontrol eder  
+- “pending” mi, “son indirildiği tarih” ne zaman, hata var mı — hepsini log’da gösterir  
+- GSC paneline girmeden sitemap durumlarını görmenizi sağlar  
+
+---
+
+### 📊 Performans Verilerini Getir (Search Analytics Özeti)
+- GSC’deki doğrulanmış tüm siteler için son **7 günlük performansı** getirir  
+- Veriler:  
+  - Tıklama  
+  - Gösterim  
+  - Ortalama CTR  
+  - Ortalama Pozisyon  
+- Sol listeye site URL’lerini yazar  
+- Sağ tarafta “📊 Performans Özeti” panelinde detayları gösterir  
+
+---
+
+### 💾 Log Kaydet (.txt)
+- Sağdaki log alanındaki tüm içeriği `.txt` dosyası olarak kaydeder  
+- Özellikle çoklu domain yönetiminde hata analizi için kullanışlıdır  
+
+---
+
+## 🧭 KİMLER KULLANMALI?
+
+- 📰 Haber siteleri ve çoklu domain yöneten yayıncılar  
+- 🛍️ E-ticaret ve pazaryeri işletmeleri  
+- 🧰 SEO ajansları ve uzmanları  
+- 🧑‍💻 Web geliştiricileri (deployment sonrası sitemap süreçlerini hızlandırmak için)
+
+---
+
+## 🤔 NEDEN BU ARAÇ?
+
+- ⏱️ Aynı işlemi GSC arayüzünde tek tek yapmak zaman alır  
+- 🧩 Tüm sitelerinizi tek pencereden yönetirsiniz  
+- 🛡️ OAuth sayesinde hesap güvenliği korunur  
+- ✔️ Hata ve başarı log’larını anlık görürsünüz  
+- 📊 Artık sitemap yönetimi + performans analizi aynı ekrandan yapılabilir  
+
+---
+
+## 🚀 HIZLI BAŞLANGIÇ
+
+### 1️⃣ Gereksinimler
+- Python 3.9+  
+- Google Cloud Console erişimi (OAuth oluşturmak için)  
+- GSC üzerinde doğrulanmış web siteler  
+
+---
+
+### 2️⃣ Kurulum
+```bash
+git clone https://github.com/ebubekirbastama/gsc-sitemap-submitter-metro.git
+cd gsc-sitemap-submitter-metro
 
 python -m venv .venv
-.venv\Scripts\activate   (Windows)
-source .venv/bin/activate  (macOS/Linux)
+# Windows
+.venv\Scripts\activate
+# macOS / Linux
+source .venv/bin/activate
 
 pip install -r requirements.txt
-
-3) GOOGLE OAUTH HAZIRLIĞI
---------------------------------
-1. Google Cloud Console → APIs & Services → Credentials
-2. Create Credentials → OAuth client ID
-3. Application type: Desktop app
-4. İndirilen dosyayı proje köküne "credentials.json" adıyla koyun
-5. Search Console API’yi etkinleştirin
-
-İlk çalıştırmada tarayıcıda OAuth onayı alınır ve otomatik olarak "token.json" kaydedilir.
-
-4) ÇALIŞTIRMA
---------------------------------
-python gsc_sitemap_submit_gui_metro.py
-
-5) KULLANIM
---------------------------------
-1. 🔐 Google ile Yetkilendir (OAuth)
-2. 📂 .txt Yükle → sitemap URL’lerinizi içeren dosyayı seçin
-3. ➕ Elle Ekle → tek tek URL girişi
-4. 🚀 Seçilenleri Submit Et → GSC’ye gönderin
-
-.txt Örnek:
-https://alanadiniz.com/sitemap.xml
-https://site2.com/sitemap_index.xml
-https://site3.com/sitemaps/news.xml
-
-------------------------------------------------------------
-🧩 PROJE YAPISI
-------------------------------------------------------------
-gsc-sitemap-submitter-metro/<br>
-├─ assets/<br>
-│  ├─ hero.png<br>
-│  ├─ submit.png<br>
-│  └─ oauth.png<br>
-├─ gsc_sitemap_submit_gui_metro.py<br>
-├─ requirements.txt<br>
-├─ .gitignore<br>
-└─ README.txt<br>
-
-------------------------------------------------------------
-⚠️ SIK KARŞILAŞILAN HATALAR
-------------------------------------------------------------
-HttpError 403 → site doğrulanmamış veya yanlış hesap<br>
-credentials.json yok → Cloud Console’dan OAuth client oluşturmalısınız<br>
-invalid_grant → token.json silip yeniden yetkilendirin<br>
-.txt hatası → her satır tam URL olmalı (.xml ile bitmeli)<br>
-
-------------------------------------------------------------
-🔐 GÜVENLİK NOTLARI
-------------------------------------------------------------
-- credentials.json ve token.json gizli dosyalardır<br>
-- Versiyon kontrolüne dahil edilmemelidir<br>
-- .gitignore bu dosyaları korur<br>
-
-------------------------------------------------------------
-🧭 YOL HARİTASI
-------------------------------------------------------------
-[ ] GSC’den mevcut sitemap’leri listeleme  
-[ ] Submit loglarını CSV/JSON dışa aktarma  
-[ ] Tema seçenekleri (açık/kapalı tema)  
-
-------------------------------------------------------------
-🤝 KATKIDA BULUNMA
-------------------------------------------------------------
-Pull request’ler ve issue’lar memnuniyetle kabul edilir!
-
-------------------------------------------------------------
-📄 LİSANS
-------------------------------------------------------------
-MIT Lisansı – Dilediğiniz gibi kullanın, geliştirin, özelleştirin.
-
-------------------------------------------------------------
-💬 SSS
-------------------------------------------------------------
-Bu araç Google’a ping atar mı?
-→ Hayır, Search Console API ile resmi submit işlemi yapar.
-
-XML olmayan URL eklenebilir mi?
-→ Evet fakat araç uyarır; GSC yalnızca geçerli sitemap’leri işler.
-
-Birden fazla domain ekleyebilir miyim?
-→ Evet, .txt dosyasına satır satır ekleyin.
-
-Sitemap index dosyası desteklenir mi?
-→ Evet, sitemap_index.xml dosyalarını normal sitemap gibi submit edebilirsiniz.
